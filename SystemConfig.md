@@ -2,9 +2,10 @@
 
 [一、树莓派安装](#一)  
 [二、更新系统](#二)  
-[三、树莓派安装](#三)  
-[四、树莓派安装](#四)  
-[五、树莓派安装](#五)  
+[三、树莓派扩展工具](#三)  
+[四、安装kali组件](#四)  
+[五、wifi设置](#五)  
+[六、图形界面与命令行界面的切换](#六)  
 
 <h5 id="一">一、树莓派安装（笔记本直连）</h5>
 
@@ -49,3 +50,14 @@ deb-src http://mirrors.ustc.edu.cn/kali-security kali-current/updates main contr
 #vi /etc/network/interfaces</br>
 auto wlan0 iface wlan0 inet dhcp</br>
 wpa-ssid “your network name” wpa-psk “the network password”
+
+
+<h5 id="六">六、图形界面与命令行界面的切换</h5>
+#vi /etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT=”quiet”中的quiet修改为text
+切换方法：
+按“Ctrl+Alt+f3”（笔记本一般是按“Ctrl+Alt+fn+f3”）即可切换到命令行模式；
+按“Ctrl+Alt+f1” （笔记本一般是按“Ctrl+Alt+fn+f1”）可以切换回图形化界面（如果无法切换，请尝试重启）
+
+
+
