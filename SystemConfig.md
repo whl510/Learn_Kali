@@ -3,7 +3,7 @@
 [二、更新系统](#二、更新系统)  
 [三、树莓派扩展工具](#三、树莓派扩展工具)  
 [四、安装kali组件](#四、安装kali组件)  
-[五、wifi设置](#五.wifi设置)  
+[五、wifi设置](#五、wifi设置)  
 [六、图形界面与命令行界面的切换](#六、图形界面与命令行界面的切换)  
 
 
@@ -51,7 +51,7 @@
     apt-cache search kali-
     apt-get install kali-linux-all
 ```
-### 五.wifi设置
+### 五、wifi设置
 * 第一种方式
 ```
     vi /etc/network/interfaces
