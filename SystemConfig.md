@@ -3,13 +3,13 @@
 [二、更新系统](#二、更新系统)  
 [三、树莓派扩展工具](#三、树莓派扩展工具)  
 [四、安装kali组件](#四、安装kali组件)  
-[五、wifi设置](#五、wifi设置)  
+[五、wifi设置](#wifi设置)  
 [六、图形界面与命令行界面的切换](#六、图形界面与命令行界面的切换)  
 
 
 
 ***
-## 一、树莓派安装
+### 一、树莓派安装
 * SD卡里面那个cmdline.txt文件里面加一个ip＝192.168.137.2 （不用换行，就在末尾空一格添加） 地址随便填，但是等会要和电脑的一个网段，然后和电脑用网线连起来，然后以太网属性，IPV4那个，把电脑地址设为静态，比如192.168.137.1  
 * 在SD卡根目录新建一个ssh.txt（空白内容就好）才能连ssh  
 * 主要下面操作
@@ -20,7 +20,7 @@
     * 连接网线  
     * arp -a查找树莓派IP
 
-## 二、更新系统
+### 二、更新系统
 ```
     vi /etc/apt/sources.list</br>  
 
@@ -37,7 +37,7 @@
 
     apt-get update && apt-get upgrade && apt-get dist-upgrade && apt-get clean
 ```
-## 三、树莓派扩展工具
+### 三、树莓派扩展工具
 树莓派默认不会完整的使用整个SD卡空间，所以需要扩展分区
 针对树莓派最好的扩展工具是raspi-config，在kali1的源中也是存在的，但在2.0版本中则被移除了，只好手动安装。
 首先从http://archive.raspberrypi.org/debian/pool/main/r/raspi-config/下载最新的raspi-config，然后解决依赖
@@ -46,12 +46,12 @@
     dpkg -i raspi-config_20180406+1_all.deb
 ```
 在终端输入raspi-config，连按两次确定键，重启即可(df -h显示SD卡整个空间)
-## 四、安装kali组件
+### 四、安装kali组件
 ```
     apt-cache search kali-
     apt-get install kali-linux-all
 ```
-## 五、wifi设置
+### wifi设置
 * 第一种方式
 ```
     vi /etc/network/interfaces
@@ -80,7 +80,7 @@
 
     service networking restart
 ```
-## 六、图形界面与命令行界面的切换
+### 六、图形界面与命令行界面的切换
 ```
     vi /etc/default/grub
 ```
