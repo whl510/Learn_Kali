@@ -51,7 +51,7 @@
     apt-cache search kali-
     apt-get install kali-linux-all
 ```
-### wifi设置
+### 五、wifi设置
 * 第一种方式
 ```
     vi /etc/network/interfaces
