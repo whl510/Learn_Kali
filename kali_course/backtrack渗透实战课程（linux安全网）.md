@@ -1,6 +1,6 @@
 ## 目录
 * [一、backtrack实践教程--破解VPN](#一-backtrack实践教程--破解VPN)  
-* [二、CrackWPA破解_WPA实战教程](#二-CrackWPA破解_WPA实战教程)  
+* [二、CrackWPA破解_WPA实战教程](#CrackWPA破解_WPA实战教程)  
 * [三、crackWEP实战课程](#三、crackWEP实战课程) 
 * [四、msf上最新ie漏洞的利用](#四、msf上最新ie漏洞的利用)
 * [五、RCE远程代码执行演示](#五、RCE远程代码执行演示) 
@@ -28,7 +28,7 @@
     cd /pentest/passwords/wordlists/
     cat darkc0de.lst | thc-pptp-bruter -u [用户名] -n 99 -l 999 10.0.0.3
 ```
-### 二 CrackWPA破解_WPA实战教程
+### 二、CrackWPA破解_WPA实战教程
 ```
     airmon-ng start wlan0
     注：结果中记录monitor mode的名字（如：mon7）
