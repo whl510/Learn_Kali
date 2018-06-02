@@ -21,18 +21,18 @@
 
 ### 二、更新系统
 ```
-    vi /etc/apt/sources.list</br>  
+    vi /etc/apt/sources.list
 
-    #阿里云kali源</br>
-    deb http://mirrors.aliyun.com/kali kali-rolling main non-free contrib</br>
-    deb-src http://mirrors.aliyun.com/kali kali-rolling main non-free contrib</br>
-    deb http://mirrors.aliyun.com/kali-security kali-rolling/updates main contrib non-free</br>
-    deb-src http://mirrors.aliyun.com/kali-security kali-rolling/updates main contrib non-free</br>
-    #中科大kali源</br>
-    deb http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib</br>
-    deb-src http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib</br>
-    deb http://mirrors.ustc.edu.cn/kali-security kali-current/updates main contrib non-free</br>
-    deb-src http://mirrors.ustc.edu.cn/kali-security kali-current/updates main contrib non-free</br>
+    #阿里云kali源
+    deb http://mirrors.aliyun.com/kali kali-rolling main non-free contrib
+    deb-src http://mirrors.aliyun.com/kali kali-rolling main non-free contrib
+    deb http://mirrors.aliyun.com/kali-security kali-rolling/updates main contrib non-free
+    deb-src http://mirrors.aliyun.com/kali-security kali-rolling/updates main contrib non-free
+    #中科大kali源
+    deb http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
+    deb-src http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
+    deb http://mirrors.ustc.edu.cn/kali-security kali-current/updates main contrib non-free
+    deb-src http://mirrors.ustc.edu.cn/kali-security kali-current/updates main contrib non-free
 
     apt-get update && apt-get upgrade && apt-get dist-upgrade && apt-get clean
 ```
