@@ -237,10 +237,17 @@ waf00f.py http://10.1.1.1
 samrdump.py cisco:cisco@10.1.1.1 445/SMB
 ```
 #### 5、综合漏洞发现工具Nessus
+`[参考网站](https://www.cnblogs.com/lsdb/p/9003692.html)`|[参考网站](https://www.cnblogs.com/lsdb/p/9003692.html "参考网站")|
 ```
+    https://www.tenable.com/products/nessus/activation-code
+    注：点击Register Now获取激活码（在邮箱查看），并获取软件
+
     下载nessus并安装：dpkg -i Nessus-6.5.3-debian6_i386.deb
     启动软件：/etc/init.d/nessusd start
     打开浏览器，http://localhost:8834（注：http://www.tenable.com/products/nessus-homefeed进行注册）
+
+    输入kali账号密码root/toor->输入HOME,Professional or Manager和Activation Code[0044-A395-A596-A0EA-A925]
+
     Scans->Add->Name[cisco]->ScanTargets[10.1.1.1]->Policy[Internal Network Scan]->Launch Scan
 ```
 ### 四、BT5.2011.4.社会工程学
