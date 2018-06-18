@@ -1,7 +1,7 @@
 ## 目录
 * [一、第1课.认识BackTrack渗透测试平台](#一第1课认识BackTrack渗透测试平台)  
 * [二、第2课.下载与安装BackTrack平台](#二第2课下载与安装BackTrack平台)
-* [三、第3课.打造BackTrack Live USB&CD](#三第3课打造BackTrack Live USBCD)
+* [三、第3课.打造BackTrack Live USB&CD](#三第3课打造BackTrackLiveUSBCD)
 * [四、第4课.BackTrack环境的基本配置与汉化](#四第4课BackTrack环境的基本配置与汉化)
 * [五、第5课.BackTrack远程管理方法-SSH](#五第5课BackTrack远程管理方法SSH)
 * [六、第6课.快速熟悉BackTrack图形化界面及渗透测试工具的分类](#六第6课快速熟悉BackTrack图形化界面及渗透测试工具的分类)
